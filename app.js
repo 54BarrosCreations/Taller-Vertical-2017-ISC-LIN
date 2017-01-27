@@ -1,129 +1,64 @@
-/**
- * Copyright 2015 IBM Corp. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-
-require('dotenv').load({ silent: true });
-const express = require('express');
-const app = express();
-const DocumentConversionV1 = require('watson-developer-cloud/document-conversion/v1');
-const fs = require('fs');
-const path = require('path');
-const multer = require('multer');
-
-
-// Bootstrap application settings
-require('./config/express')(app);
-
-
-const documentConversion = new DocumentConversionV1({
-  // If unspecified here, the DOCUMENT_CONVERSION_USERNAME and DOCUMENT_CONVERSION_PASSWORD env properties will be checked
-  // After that, the SDK will fall back to the bluemix-provided VCAP_SERVICES environment property
-  // username: '<username>',
-  // password: '<password>',
-  version_date: '2015-12-01',
+var express = require('express');
+var path = require('path');
+var logger = require('morgan');
+var cookieParser = require('cookie-parser');
+var bodyParser = require('body-parser');
+ 
+// Used to connect to the MongoDB database
+var mongo = require('mongodb')
+ 
+var routes = require('./routes/index');
+var users = require('./routes/users');
+ 
+var app = express();
+ 
+// Define the directory with the views and to use Jade
+app.set('views', path.join(__dirname, 'views'));
+app.set('view engine', 'jade');
+ 
+// uncomment after placing your favicon in /public
+//app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
+app.use(logger('dev'));
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(cookieParser());
+app.use(express.static(path.join(__dirname, 'public')));
+ 
+// Define what route files to use being routes/index.js for /
+// routes/users.js for /users
+// The route files then render the page
+app.use('/', routes);
+app.use('/users', users);
+ 
+// catch 404 and forward to error handler
+app.use(function(req, res, next) {
+  var err = new Error('Not Found');
+  err.status = 404;
+  next(err);
 });
-
-const types = {
-  ANSWER_UNITS: '.json',
-  NORMALIZED_HTML: '.html',
-  NORMALIZED_TEXT: '.txt',
-};
-
-const samples = ['sampleHTML.html', 'samplePDF.pdf', 'sampleWORD.docx'];
-const uploadFolder = path.join(__dirname, 'uploads/');
-const sampleFolder = path.join(__dirname, 'public/data/');
-
-/**
- * Returns the file path to a previously uploaded file or a sample file
- * @param  {String} filename the file name
- * @return {String} absolute path to the file or null if it doesn't exists
- */
-function getFilePath(filename) {
-  if (samples.indexOf(filename) !== -1) {
-    return sampleFolder + filename;
-  }
-  if (fs.readdirSync(uploadFolder).indexOf(filename) !== -1) {
-    return uploadFolder + filename;
-  }
-  return null;
-}
-
-app.get('/', (req, res) => {
-  res.render('index');
-});
-
-// Setup the upload mechanism
-const upload = multer({
-  storage: multer.diskStorage({
-    destination(req, file, cb) {
-      cb(null, './uploads/');
-    },
-    filename(req, file, cb) {
-      cb(null, `${Date.now()}-${file.originalname}`);
-    },
-  }),
-});
-
-/*
- * Uploads a file
- */
-app.post('/files', upload.single('document'), (req, res, next) => {
-  if (!req.file && !req.file.path) {
-    return next({
-      error: 'Missing required parameter: file',
-      code: 400,
+ 
+// error handlers
+ 
+// development error handler
+// will print stacktrace
+if (app.get('env') === 'development') {
+  app.use(function(err, req, res, next) {
+    res.status(err.status || 500);
+    res.render('error', {
+      message: err.message,
+      error: err
     });
-  }
-  res.json({
-    id: req.file.filename,
+  });
+}
+ 
+// production error handler
+// no stacktraces leaked to user
+app.use(function(err, req, res, next) {
+  res.status(err.status || 500);
+  res.render('error', {
+    message: err.message,
+    error: {}
   });
 });
-
-/*
- * Converts a document
- */
-app.get('/api/convert', (req, res, next) => {
-  const file = getFilePath(req.query.document_id);
-  const params = {
-    conversion_target: req.query.conversion_target,
-    file: file ? fs.createReadStream(file) : null,
-  };
-
-  documentConversion.convert(params, (err, data) => {
-    if (err) {
-      return next(err);
-    }
-    const type = types[req.query.conversion_target];
-    res.type(type);
-    if (req.query.download) {
-      res.setHeader('content-disposition', `attachment; filename=output-${Date.now()}.${type}`);
-    }
-    res.send(data);
-  });
-});
-
-/*
- * Returns an uploaded file from the service
- */
-app.get('/files/:id', (req, res) => {
-  const file = getFilePath(req.params.id);
-  res.sendFile(file);
-});
-
-// error-handler settings
-require('./config/error-handler')(app);
-
+ 
 module.exports = app;

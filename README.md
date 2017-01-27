@@ -1,121 +1,35 @@
-# Document Conversion Demo [![Build Status](https://travis-ci.org/watson-developer-cloud/document-conversion-nodejs.svg?branch=master)](https://travis-ci.org/watson-developer-cloud/document-conversion-nodejs)
+# final-page (index.html)
+---------------------------------------------------------------------------------------------------------------------------------------------
+Introduction:
 
-  The [Document Conversion][service_url] service transforms HTML, PDF, and Microsoft™ Word documents into normalized HTML, plain text, or sets of Answer units. The Answer units can be run through a utility to convert it to the Solr JSON file type needed to train the Retrieve and Rank service.
+This project analize the needs of the customers according to the "Hospital Puerta de Hierro" services.
 
-Give it a try! Click the button below to fork into IBM DevOps Services and deploy your own copy of this application on Bluemix.
+Looking fot the comfort of the users, we thought in a speech-to-text dynamic in the web page.
+This speech-to-text dynamic is to give a faster and efficient service.
 
-[![Deploy to Bluemix](https://bluemix.net/deploy/button.png)](https://bluemix.net/deploy?repository=https://github.com/watson-developer-cloud/document-conversion-nodejs)
+FIrst we started to create the web page in html using javascript, editing the css format and another tools to apply it for "Hospital Puerta de Hierro".
 
-## Getting Started
+Then we use MongoDB to create the database of the doctors to link them with the users in the web page according to their prefferences, searching for all the doctors that are available in order to the opperation that the client is looking for.
 
-1. Create a Bluemix Account
+---------------------------------------------------------------------------------------------------------------------------------------------
+Steps:
 
-  [Sign up][sign_up] in Bluemix, or use an existing account. Watson Services in Beta are free to use.
+                   ---------------------------------------------------[user]--------------------------------------------
+                   |                               |                (Questions)                        |               |
+                   |                               |                        |                          |               |
+ [Which medical procedure do you need?] [Date for medical procedure] [Require transportation?] [Requiire a hotel?] [Register]
+          
+Using this questions, we register all the answers on the database to search for the best options to the client for his trip.
+---------------------------------------------------------------------------------------------------------------------------------------------
+Instructions:
 
-2. Download and install the [Cloud-foundry CLI][cloud_foundry] tool
+User: Start looking the web page to see the about the hospital, contacts, partner/clients and then when the user start the survey need to answer the questiosn using speech to text, that will help to search the best option for the trip and the doctors that are vailable to do what the client want. FInally they just need to compelte the format to the hospital.
 
-3. Edit the `manifest.yml` file and change the `<application-name>` to something unique.
-  ```none
-  applications:
-  - services:
-    - document-conversion-service
-    name: <application-name>
-    path: .
-    memory: 256M
-  ```
-  The name you use will determinate your application url initially, e.g. `<application-name>.mybluemix.net`.
+Developers: The information that is stored in the javascript file by speech-to-text will be send to the mongoDB that will catch the information to resend the best options for the user, using a server like intermediary to make this work.
 
-4. Connect to Bluemix in the command line tool
-  ```sh
-  $ cf api https://api.ng.bluemix.net
-  $ cf login -u <your user ID>
-  ```
+---------------------------------------------------------------------------------------------------------------------------------------------
+Future improvements:
 
-5. Create the Document Conversion service in Bluemix
-  ```sh
-  $ cf create-service document_conversion standard document-conversion-service
-  ```
-
-6. Push it live!
-  ```sh
-  $ cf push
-  ```
-
-## Running locally
-  The application uses [Node.js](http://nodejs.org/) and [npm](https://www.npmjs.com/) so you will have to download and install them as part of the steps below.
-
-1. Copy the credentials from your `document-conversion-service` service in Bluemix to `app.js`, you can see the credentials using:
-
-    ```sh
-    $ cf env <application-name>
-    ```
-    Example output:
-    ```sh
-    System-Provided:
-    {
-    "VCAP_SERVICES": {
-      "document_conversion": [{
-          "credentials": {
-            "url": "<url>",
-            "password": "<password>",
-            "username": "<username>"
-          },
-        "label": "document_conversion",
-        "name": "document-conversion-service",
-        "plan": "standard"
-     }]
-    }
-    }
-    ```
-
-    You need to copy `username`, `password` and `url`.
-
-2. Install [Node.js](http://nodejs.org/)
-3. Go to the project folder in a terminal and run:
-    `npm install`
-4. Start the application
-5.  `npm start`
-6. Go to `http://localhost:3000`
-
-### Directory structure
-
-```none
-.
-├── app.js                      // express routes
-├── config                      // express configuration
-│   ├── error-handler.js
-│   ├── express.js
-│   └── security.js
-├── manifest.yml
-├── package.json
-├── public                      // static resources
-├── server.js                   // entry point
-├── test                        // unit tests
-├── training
-│   └── weather_data_train.csv  // training file
-└── views                       // react components
-```
-
-
-## Troubleshooting
-
-To troubleshoot your Bluemix app the main useful source of information are the logs, to see them, run:
-
-  ```sh
-  $ cf logs <application-name> --recent
-  ```
-
-## License
-
-  This sample code is licensed under Apache 2.0. Full license text is available in [COPYING](LICENSE).
-
-## Contributing
-
-  See [CONTRIBUTING](CONTRIBUTING.md).
-
-## Open Source @ IBM
-  Find more open source projects on the [IBM Github Page](http://ibm.github.io/)
-
-[service_url]: http://www.ibm.com/smarterplanet/us/en/ibmwatson/developercloud/document-conversion.html
-[cloud_foundry]: https://github.com/cloudfoundry/cli
-[sign_up]: https://console.ng.bluemix.net/registration/
+	*)Improve the database with all the doctors that are registered in Hospital Puerta de Hierro.
+	*)Improve graphical interface with Virtual Reality.
+	*)Improve sorting algorithm to make a faster searching.
